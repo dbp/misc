@@ -6,3 +6,4 @@ This is a collection of miscelaneous code. Right now it has:
 * gcd.rs - a simple implementation of Euclid's gcd, with printing.
 * eea.rs - implementation of the Extended Euclidean Algorithm, for solving for au + bv = gcd(a,b)
 * fpa.rs - implementation of the Fast Powering Algoritm
+* ord.rs - calculating factors (ie, ord) of numbers
