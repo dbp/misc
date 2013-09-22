@@ -13,7 +13,7 @@ fn eea(a : int, b : int, u : int, g : int, x : int, y : int) -> (int,int,int) {
     if y == 0 {
         return (g, u, (g - a * u)/b);
     }
-    let q = g % y;
+    let q = g / y;
     let t = g % y;
     let s = u - q * x;
     eea(a, b, x, y, s, t)
