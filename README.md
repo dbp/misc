@@ -7,3 +7,4 @@ This is a collection of miscelaneous code. Right now it has:
 * eea.rs - implementation of the Extended Euclidean Algorithm, for solving for au + bv = gcd(a,b)
 * fpa.rs - implementation of the Fast Powering Algoritm
 * ord.rs - calculating factors (ie, ord) of numbers
+* prim_roots.rs - calculates primitive roots for a prime, by brute force
