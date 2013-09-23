@@ -8,3 +8,4 @@ This is a collection of miscelaneous code. Right now it has:
 * fpa.rs - implementation of the Fast Powering Algoritm
 * ord.rs - calculating factors (ie, ord) of numbers
 * prim_roots.rs - calculates primitive roots for a prime, by brute force
+* affine.rs - simple affine ciphers
