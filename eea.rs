@@ -11,7 +11,12 @@ fn main() {
 
 fn eea(a : int, b : int, u : int, g : int, x : int, y : int) -> (int,int,int) {
     if y == 0 {
-        return (g, u, (g - a * u)/b);
+        let mut ur = u;
+        let mut vr = (g - a * u)/b;
+        while ur < 0 {
+            ur += b/g; vr -= a/g;
+        }
+        return (g, ur, vr);
     }
     let q = g / y;
     let t = g % y;
