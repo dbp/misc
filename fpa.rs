@@ -12,7 +12,7 @@ fn main() {
     println(fmt!("%d^%d = %d (mod %d)", g, n, gn, m));
 }
 
-fn fpa(g : int, n : int, m : int) -> int {
+pub fn fpa(g : int, n : int, m : int) -> int {
     let r = (int::bits as int) - (n.leading_zeros() as int);
     let mut a = g;
     let mut gn = 1;
