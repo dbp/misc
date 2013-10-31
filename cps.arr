@@ -6,6 +6,8 @@ data Expr:
   | slam(args :: List<String>, body :: Expr)
   | sid(s :: String)
   | sapp(fn :: Expr, args :: List<Expr>)
+  | stry(e :: Expr, catch :: Expr)
+  | sraise
 end
 
 data Value:
@@ -35,6 +37,7 @@ where:
   interp(slam([], snum(1))) is vlam([], snum(1), [])
   interp(sapp(slam([], snum(1)), [])) is vnum(1)
   interp(sapp(slam(["x"], sadd(sid("x"),snum(1))), [snum(1)])) is vnum(2)
+  interp(sapp(slam(["x", "y"], sadd(sid("x"), sid("y"))), [snum(1), snum(1)])) is vnum(2)
 end
 
 fun lookup(env :: List<Pair>, id :: String):
@@ -73,39 +76,51 @@ end
 
 fun cps(e :: Expr) -> is-slam:
   cases(Expr) e:
-    | snum(n) => slam(["k"], sapp(sid("k"), [snum(n)]))
+    | snum(n) => slam(["k", "r"], sapp(sid("k"), [snum(n)]))
     | sadd(l, r) =>
-      slam(["k"],
+      slam(["k", "r"],
         sapp(cps(l),
           [slam(["v1"],
               sapp(cps(r),
                 [slam(["v2"],
                   sapp(sid("k"),
-                    [sadd(sid("v1"), sid("v2"))]))]))]))
+                    [sadd(sid("v1"), sid("v2"))])),
+                sid("r")])),
+          sid("r")]))
     | slam(args, body) =>
-      slam(["k"] + args,
-        sapp(cps(body), [sid("k")]))
-    | sid(i) => slam(["k"], sapp(sid("k"), [sid(i)]))
+      slam(["k", "r"] + args,
+        sapp(cps(body), [sid("k"), sid("r")]))
+    | sid(i) => slam(["k", "r"], sapp(sid("k"), [sid(i)]))
     | sapp(fn, _args) =>
       args = zip-index(_args)
-      slam(["k"],
+      slam(["k", "r"],
         args.foldr(fun(arg, base):
-          sapp(cps(arg.b),
-            [slam(["v" + tostring(arg.a)],
-                base)])
-        end,
+            sapp(cps(arg.b),
+              [slam(["v" + tostring(arg.a)],
+                  base),
+                sid("r")])
+          end,
           sapp(cps(fn),
-            [sid("k")] + args.map(fun(a): sid("v" + tostring(a.a)) end))))
+            [sid("k"), sid("r")] + args.map(fun(a): sid("v" + tostring(a.a)) end))))
+    | stry(body, catch) =>
+      slam(["k", "r"], sapp(cps(body), [sid("k"), slam([], sapp(cps(catch), [sid("k"), sid("r")]))]))
+    | sraise =>
+      slam(["k", "r"], sapp(sid("r"), []))
   end
 end
 
 
 fun interp-cps(e :: Expr) -> Value:
-  interp(sapp(cps(e), [slam(["_arg_"], sid("_arg_"))]))
+  interp(sapp(cps(e), [slam(["_arg_"], sid("_arg_")),
+        slam([], sid("__try__"))]))
 where:
   interp-cps(snum(19)) is vnum(19)
   interp-cps(sadd(snum(1),snum(1))) is vnum(2)
   interp-cps(sapp(slam([], snum(1)), [])) is vnum(1)
   interp-cps(sapp(slam(["x"], sid("x")), [snum(1)])) is vnum(1)
   interp-cps(sapp(slam(["x"], sadd(sid("x"),snum(1))), [snum(1)])) is vnum(2)
+
+  interp-cps(stry(sadd(sraise, snum(1)), snum(12))) is vnum(12)
+  interp-cps(stry(stry(sadd(sraise, snum(1)), sadd(snum(1), sraise)), snum(2))) is vnum(2)
+
 end
